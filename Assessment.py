@@ -30,6 +30,7 @@ TOP_VIEWPORT_MARGIN = 300
 
 Lives = 3
 
+
 class MyGame(arcade.Window):
     """
     Main application class.
@@ -42,6 +43,8 @@ class MyGame(arcade.Window):
 
         # These are 'lists' that keep track of our sprites. Each sprite should
         # go into a list.
+        self.flags_list = None
+        self.foreground_list = None
         self.coin_list = None
         self.wall_list = None
         self.player_list = None
@@ -73,8 +76,7 @@ class MyGame(arcade.Window):
         self.lives -= 1
 
         self.player_sprite.center_x = 128
-        self.player_sprite.center_y = 128
-
+        self.player_sprite.center_y = 500
 
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
@@ -92,23 +94,27 @@ class MyGame(arcade.Window):
         self.wall_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
         self.background_list = arcade.SpriteList()
+        self.flags_list = arcade.SpriteList()
+        self.foreground_list = arcade.SpriteList()
 
         # Set up the player, specifically placing it at these coordinates.
-        image_source = ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png"
+        image_source = ":resources:images/animated_characters/male_adventurer/maleAdventurer_idle.png"
         self.player_sprite = arcade.Sprite(image_source, CHARACTER_SCALING)
         self.player_sprite.center_x = 128
-        self.player_sprite.center_y = 128
+        self.player_sprite.center_y = 500
         self.player_list.append(self.player_sprite)
 
         # --- Load in a map from the tiled editor ---
 
         # Name of map file to load
-        map_name = "Map.tmx"
+        map_name = "Map4.tmx"
         # Name of the layer in the file that has our platforms/walls
         platforms_layer_name = 'Platforms'
         # Name of the layer that has items for pick-up
         coins_layer_name = 'Coins'
         background_layer_name = 'Background'
+        flags_layer_name = 'Flags'
+        foreground_layer_name = 'Foreground'
 
         # Read in the tiled map
         my_map = arcade.tilemap.read_tmx(map_name)
@@ -121,8 +127,9 @@ class MyGame(arcade.Window):
 
         # -- Coins
         self.coin_list = arcade.tilemap.process_layer(my_map, coins_layer_name, TILE_SCALING)
-
+        self.flags_list = arcade.tilemap.process_layer(my_map, flags_layer_name, TILE_SCALING)
         self.background_list = arcade.tilemap.process_layer(my_map, background_layer_name, TILE_SCALING)
+        self.foreground_list = arcade.tilemap.process_layer(my_map, foreground_layer_name, TILE_SCALING)
 
         # --- Other stuff
         # Set the background color
@@ -145,8 +152,8 @@ class MyGame(arcade.Window):
         self.wall_list.draw()
         self.coin_list.draw()
         self.player_list.draw()
-
-
+        self.flags_list.draw()
+        self.foreground_list.draw()
 
         # Draw our score on the screen, scrolling it with the viewport
         score_text = f"Score: {self.score}"
@@ -155,7 +162,7 @@ class MyGame(arcade.Window):
 
         Cords_texty = f"Cords y: {self.player_sprite.center_y}"
         arcade.draw_text(Cords_texty, 10 + self.view_left, 30 + self.view_bottom,
-                        arcade.csscolor.WHITE, 18)
+                         arcade.csscolor.WHITE, 18)
 
         Cords_textx = f"Cords x: {self.player_sprite.center_x}"
         arcade.draw_text(Cords_textx, 10 + self.view_left, 50 + self.view_bottom,
@@ -164,6 +171,7 @@ class MyGame(arcade.Window):
         lives_text = f"Lives: {self.lives}"
         arcade.draw_text(lives_text, 10 + self.view_left, 70 + self.view_bottom,
                          arcade.csscolor.WHITE, 18)
+
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
 
@@ -182,8 +190,6 @@ class MyGame(arcade.Window):
                 self.score = self.score - 5
             elif self.score < 5:
                 self.score = 0
-
-
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
