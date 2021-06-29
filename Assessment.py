@@ -1,12 +1,16 @@
 """
-Platformer Game
+Super bruv
 """
+
 import arcade
+
+import timeit
+
 
 # Constants
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
-SCREEN_TITLE = "Platformer"
+SCREEN_TITLE = "Super Bruv"
 
 # Constants used to scale our sprites from their original size
 CHARACTER_SCALING = 1
@@ -29,9 +33,38 @@ BOTTOM_VIEWPORT_MARGIN = 150
 TOP_VIEWPORT_MARGIN = 300
 
 Lives = 3
+level = 1
+
+class InstructionView(arcade.View):
+    def on_show(self):
+        """ This is run once when we switch to this view """
+        arcade.set_background_color(arcade.csscolor.DARK_SLATE_BLUE)
+
+        # Reset the viewport, necessary if we have a scrolling game and we need
+        # to reset the viewport back to the start so we can see what we draw.
+        arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
+
+    def on_draw(self):
+        """ Draw this view """
+        arcade.start_render()
+        img = arcade.load_texture('boom.png')
+        arcade.draw_lrwh_rectangle_textured(0, 0, 1000, 650, img)
+
+        arcade.draw_text("Super Bruv", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+                         arcade.color.BLACK, font_size=50, anchor_x="center")
+        arcade.draw_text("Click to advance", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 75,
+                         arcade.color.BLACK, font_size=20, anchor_x="center")
+        arcade.draw_text("By Jacob.L", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 140,
+                         arcade.color.BLACK, font_size=20, anchor_x="center")
+
+    def on_mouse_press(self, _x, _y, _button, _modifiers):
+        """ If the user presses the mouse button, start the game. """
+        game_view = GameView()
+        game_view.setup(level)
+        self.window.show_view(game_view)
 
 
-class MyGame(arcade.Window):
+class GameView(arcade.View):
     """
     Main application class.
     """
@@ -39,7 +72,7 @@ class MyGame(arcade.Window):
     def __init__(self):
 
         # Call the parent class and set up the window
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__()
 
         # These are 'lists' that keep track of our sprites. Each sprite should
         # go into a list.
@@ -59,11 +92,21 @@ class MyGame(arcade.Window):
         # Used to keep track of our scrolling
         self.view_bottom = 0
         self.view_left = 0
+        self.view_top = 0
+        self.view_right = 0
 
         # Keep track of the score
         self.score = 0
         self.lives = 3
+        self.level = 1
 
+
+        self.upheld = False
+
+        # Variables used to calculate frames per second
+        self.frame_count = 0
+        self.fps_start_timer = None
+        self.fps = None
         # Load sounds
         self.collect_coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
         self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
@@ -78,16 +121,17 @@ class MyGame(arcade.Window):
         self.player_sprite.center_x = 128
         self.player_sprite.center_y = 500
 
-    def setup(self):
+    def setup(self,level):
         """ Set up the game here. Call this function to restart the game. """
 
         # Used to keep track of our scrolling
         self.view_bottom = 0
         self.view_left = 0
+        self.view_top = 0
+        self.view_right = 0
 
         # Keep track of the score
-        self.score = 0
-        self.lives = 3
+
 
         # Create the Sprite lists
         self.player_list = arcade.SpriteList()
@@ -107,7 +151,11 @@ class MyGame(arcade.Window):
         # --- Load in a map from the tiled editor ---
 
         # Name of map file to load
-        map_name = "Map4.tmx"
+        map_name = f"Level_{level}.tmx"
+
+        # Read in the tiled map
+        my_map = arcade.tilemap.read_tmx(map_name)
+
         # Name of the layer in the file that has our platforms/walls
         platforms_layer_name = 'Platforms'
         # Name of the layer that has items for pick-up
@@ -116,8 +164,6 @@ class MyGame(arcade.Window):
         flags_layer_name = 'Flags'
         foreground_layer_name = 'Foreground'
 
-        # Read in the tiled map
-        my_map = arcade.tilemap.read_tmx(map_name)
 
         # -- Platforms
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
@@ -147,6 +193,23 @@ class MyGame(arcade.Window):
         # Clear the screen to the background color
         arcade.start_render()
 
+        # --- Calculate FPS
+
+
+        fps_calculation_freq = 60
+      # Once every 60 frames, calculate our FPS
+
+        if self.frame_count % fps_calculation_freq == 0:
+            # Do we have a start time?
+            if self.fps_start_timer is not None:
+                # Calculate FPS
+                total_time = timeit.default_timer() - self.fps_start_timer
+                self.fps = fps_calculation_freq / total_time
+            # Reset the timer
+            self.fps_start_timer = timeit.default_timer()
+        # Add one to our frame count
+        self.frame_count += 1
+
         # Draw our sprites
         self.background_list.draw()
         self.wall_list.draw()
@@ -168,17 +231,25 @@ class MyGame(arcade.Window):
         arcade.draw_text(Cords_textx, 10 + self.view_left, 50 + self.view_bottom,
                          arcade.csscolor.WHITE, 18)
 
+
         lives_text = f"Lives: {self.lives}"
         arcade.draw_text(lives_text, 10 + self.view_left, 70 + self.view_bottom,
                          arcade.csscolor.WHITE, 18)
+
+        if self.fps is not None:
+
+            output = f"FPS: {self.fps:.0f}"
+            arcade.draw_text(output, 10 + self.view_left, 90 +self.view_bottom,
+                             arcade.color.WHITE, 18)
+
+
+
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
 
         if key == arcade.key.UP or key == arcade.key.W:
-            if self.physics_engine.can_jump():
-                self.player_sprite.change_y = PLAYER_JUMP_SPEED
-                arcade.play_sound(self.jump_sound)
+            self.upheld = True
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
         elif key == arcade.key.RIGHT or key == arcade.key.D:
@@ -190,6 +261,10 @@ class MyGame(arcade.Window):
                 self.score = self.score - 5
             elif self.score < 5:
                 self.score = 0
+        if key == arcade.key.ESCAPE or key == arcade.key.P:
+            # pass self, the current view, to preserve this view's state
+            pause = PauseView(self)
+            self.window.show_view(pause)
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
@@ -198,6 +273,8 @@ class MyGame(arcade.Window):
             self.player_sprite.change_x = 0
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.player_sprite.change_x = 0
+        elif key ==  arcade.key.UP or key == arcade.key.W:
+            self.upheld = False
 
     def on_update(self, delta_time):
         """ Movement and game logic """
@@ -205,14 +282,20 @@ class MyGame(arcade.Window):
         if self.lives >= 0 and self.player_sprite.center_y < -1000:
             self.died("You fell out of the world")
         elif self.lives <= 0:
-            self.setup()
+            self.lives = 3
+            self.setup(self.level)
 
         # Move the player with the physics engine
         self.physics_engine.update()
 
+        if self.physics_engine.can_jump() and self.upheld == True:
+            self.player_sprite.change_y = PLAYER_JUMP_SPEED
+            arcade.play_sound(self.jump_sound)
         # See if we hit any coins
         coin_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
                                                              self.coin_list)
+        flag_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
+                                                             self.flags_list)
 
         # Loop through each coin we hit (if any) and remove it
         for coin in coin_hit_list:
@@ -223,6 +306,11 @@ class MyGame(arcade.Window):
             # Add one to the score
             self.score += 1
 
+        for flags in flag_hit_list:
+            flags.remove_from_sprite_lists()
+            self.level = self.level + 1
+            self.setup(self.level)
+            print(self.level)
         # --- Manage Scrolling ---
 
         # Track if we need to change the viewport
@@ -266,10 +354,65 @@ class MyGame(arcade.Window):
                                 SCREEN_HEIGHT + self.view_bottom)
 
 
+
+class PauseView(arcade.View):
+    def __init__(self, game_view):
+        super().__init__()
+        self.game_view = game_view
+
+    def on_show(self):
+         arcade.set_background_color(arcade.color.ORANGE)
+
+    def on_draw(self):
+        arcade.start_render()
+
+        # Draw player, for effect, on pause screen.
+        # The previous View (GameView) was passed in
+        # and saved in self.game_view.
+        player_sprite = self.game_view.player_sprite
+        #player_sprite.draw()
+
+        # draw an orange filter over him
+
+        arcade.draw_lrtb_rectangle_filled(left=player_sprite.left,
+                                          right=player_sprite.right,
+                                          top=player_sprite.top,
+                                          bottom=player_sprite.bottom,
+                                          color=arcade.color.ORANGE + (200,))
+
+        arcade.draw_text("PAUSED", player_sprite.left, player_sprite.top + 40,
+                         arcade.color.BLACK, font_size=50, anchor_x="center")
+
+        # Show tip to return or reset
+        arcade.draw_text("Press Esc. to return",
+                         player_sprite.left,
+                         player_sprite.top,
+                         arcade.color.BLACK,
+                         font_size=20,
+                         anchor_x="center")
+        arcade.draw_text("Press Enter to reset",
+                         player_sprite.left,
+                         player_sprite.top - 40,
+                         arcade.color.BLACK,
+                         font_size=15,
+                         anchor_x="center")
+
+    def on_key_press(self, key, _modifiers):
+        if key == arcade.key.ESCAPE:   # resume game
+            self.window.show_view(self.game_view)
+            arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
+
+        elif key == arcade.key.ENTER:  # reset game
+            self.window.show_view(InstructionView())
+
+
+
+
 def main():
     """ Main method """
-    window = MyGame()
-    window.setup()
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    start_view = InstructionView()
+    window.show_view(start_view)
     arcade.run()
 
 
