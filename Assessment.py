@@ -3,8 +3,9 @@ Super bruv
 """
 
 import arcade
-
+from arcade.experimental.lights import Light, LightLayer
 import timeit
+
 
 
 # Constants
@@ -99,6 +100,20 @@ class GameView(arcade.View):
         self.score = 0
         self.lives = 3
         self.level = 1
+
+        # New Code remove if doesnt work
+        self.torch_list = arcade.SpriteList(is_static=True)
+
+        self.light_layer = LightLayer(SCREEN_WIDTH, SCREEN_HEIGHT)
+
+        # Add lights to the location of the torches. We're just using hacky tweak value list here
+
+        self.moving_light = Light(400, 300, radius=250, mode='soft')
+        self.light_layer.add(self.moving_light)
+
+        # End of new code
+
+
 
 
         self.upheld = False
@@ -210,13 +225,23 @@ class GameView(arcade.View):
         # Add one to our frame count
         self.frame_count += 1
 
-        # Draw our sprites
-        self.background_list.draw()
-        self.wall_list.draw()
-        self.coin_list.draw()
-        self.player_list.draw()
-        self.flags_list.draw()
-        self.foreground_list.draw()
+        # New Code
+        # Everything that should be affected by lights in here
+        with self.light_layer:
+
+            self.torch_list.draw()
+            # Draw the contents with lighting
+
+            # Draw our sprites
+            self.background_list.draw()
+            self.wall_list.draw()
+            self.coin_list.draw()
+            self.player_list.draw()
+            self.flags_list.draw()
+            self.foreground_list.draw()
+
+        self.light_layer.draw()
+        # End of New code
 
         # Draw our score on the screen, scrolling it with the viewport
         score_text = f"Score: {self.score}"
@@ -256,15 +281,19 @@ class GameView(arcade.View):
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
         elif key == arcade.key.R:
             self.player_sprite.center_x = 128
-            self.player_sprite.center_y = 100
+            self.player_sprite.center_y = 500
             if self.score > 5:
                 self.score = self.score - 5
             elif self.score < 5:
                 self.score = 0
-        if key == arcade.key.ESCAPE or key == arcade.key.P:
+        elif key == arcade.key.ESCAPE or key == arcade.key.P:
             # pass self, the current view, to preserve this view's state
             pause = PauseView(self)
             self.window.show_view(pause)
+        if key == arcade.key.KEY_6:
+            self.level = self.level + 1
+            self.setup(self.level)
+
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
@@ -278,6 +307,10 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time):
         """ Movement and game logic """
+        self.moving_light.position = (
+            self.player_sprite.center_x,
+            self.player_sprite.center_y
+        )
 
         if self.lives >= 0 and self.player_sprite.center_y < -1000:
             self.died("You fell out of the world")
@@ -308,9 +341,12 @@ class GameView(arcade.View):
 
         for flags in flag_hit_list:
             flags.remove_from_sprite_lists()
-            self.level = self.level + 1
-            self.setup(self.level)
-            print(self.level)
+            try:
+                self.level = self.level + 1
+                self.setup(self.level)
+            except:
+                print("hahaha I ran out of time to make more levels")
+                exit()
         # --- Manage Scrolling ---
 
         # Track if we need to change the viewport
