@@ -36,9 +36,11 @@ TOP_VIEWPORT_MARGIN = 300
 Lives = 3
 level = 1
 
+#this is the class for creating a starting view
 class InstructionView(arcade.View):
     def on_show(self):
         """ This is run once when we switch to this view """
+
         arcade.set_background_color(arcade.csscolor.DARK_SLATE_BLUE)
 
         # Reset the viewport, necessary if we have a scrolling game and we need
@@ -48,9 +50,11 @@ class InstructionView(arcade.View):
     def on_draw(self):
         """ Draw this view """
         arcade.start_render()
+        #This is adding then drawing a background image
         img = arcade.load_texture('boom.png')
         arcade.draw_lrwh_rectangle_textured(0, 0, 1000, 650, img)
 
+        #This is drawing the text
         arcade.draw_text("Super Bruv", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
                          arcade.color.BLACK, font_size=50, anchor_x="center")
         arcade.draw_text("Click to advance", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 75,
@@ -58,18 +62,21 @@ class InstructionView(arcade.View):
         arcade.draw_text("By Jacob.L", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 140,
                          arcade.color.BLACK, font_size=20, anchor_x="center")
 
+
+    #If the player clicks the screen it will load into the game
     def on_mouse_press(self, _x, _y, _button, _modifiers):
         """ If the user presses the mouse button, start the game. """
         game_view = GameView()
         game_view.setup(level)
         self.window.show_view(game_view)
 
-
+#game class
 class GameView(arcade.View):
     """
     Main application class.
     """
 
+    #really important things
     def __init__(self):
 
         # Call the parent class and set up the window
@@ -87,7 +94,7 @@ class GameView(arcade.View):
         # Separate variable that holds the player sprite
         self.player_sprite = None
 
-        # Our physics engine
+        #physics engine
         self.physics_engine = None
 
         # Used to keep track of our scrolling
@@ -98,10 +105,13 @@ class GameView(arcade.View):
 
         # Keep track of the score
         self.score = 0
+        #Lives variable
         self.lives = 3
+        #level variable
         self.level = 1
 
         # New Code remove if doesnt work
+        #setting up torch list
         self.torch_list = arcade.SpriteList(is_static=True)
 
         self.light_layer = LightLayer(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -128,6 +138,7 @@ class GameView(arcade.View):
 
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
+    # This is the death loop
     def died(self, message):
         print(message)
         self.player_sprite.change_y = PLAYER_JUMP_SPEED
@@ -136,6 +147,7 @@ class GameView(arcade.View):
         self.player_sprite.center_x = 128
         self.player_sprite.center_y = 500
 
+    #this is the setup loop
     def setup(self,level):
         """ Set up the game here. Call this function to restart the game. """
 
@@ -144,9 +156,6 @@ class GameView(arcade.View):
         self.view_left = 0
         self.view_top = 0
         self.view_right = 0
-
-        # Keep track of the score
-
 
         # Create the Sprite lists
         self.player_list = arcade.SpriteList()
@@ -180,13 +189,13 @@ class GameView(arcade.View):
         foreground_layer_name = 'Foreground'
 
 
-        # -- Platforms
+        # -- Platforms list
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
                                                       layer_name=platforms_layer_name,
                                                       scaling=TILE_SCALING,
                                                       use_spatial_hash=True)
 
-        # -- Coins
+        # -- other lists
         self.coin_list = arcade.tilemap.process_layer(my_map, coins_layer_name, TILE_SCALING)
         self.flags_list = arcade.tilemap.process_layer(my_map, flags_layer_name, TILE_SCALING)
         self.background_list = arcade.tilemap.process_layer(my_map, background_layer_name, TILE_SCALING)
@@ -201,7 +210,7 @@ class GameView(arcade.View):
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite,
                                                              self.wall_list,
                                                              GRAVITY)
-
+#draws the level and stuff
     def on_draw(self):
         """ Render the screen. """
 
@@ -225,6 +234,8 @@ class GameView(arcade.View):
         # Add one to our frame count
         self.frame_count += 1
 
+
+
         # New Code
         # Everything that should be affected by lights in here
         with self.light_layer:
@@ -243,7 +254,7 @@ class GameView(arcade.View):
         self.light_layer.draw()
         # End of New code
 
-        # Draw our score on the screen, scrolling it with the viewport
+        # Draw our important info on the screen, scrolling it with the viewport
         score_text = f"Score: {self.score}"
         arcade.draw_text(score_text, 10 + self.view_left, 10 + self.view_bottom,
                          arcade.csscolor.WHITE, 18)
@@ -261,6 +272,7 @@ class GameView(arcade.View):
         arcade.draw_text(lives_text, 10 + self.view_left, 70 + self.view_bottom,
                          arcade.csscolor.WHITE, 18)
 
+        #draw fps
         if self.fps is not None:
 
             output = f"FPS: {self.fps:.0f}"
@@ -269,7 +281,7 @@ class GameView(arcade.View):
 
 
 
-
+#player press key this happens
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
 
@@ -294,7 +306,7 @@ class GameView(arcade.View):
             self.level = self.level + 1
             self.setup(self.level)
 
-
+#player release key this what happens
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
 
@@ -305,13 +317,17 @@ class GameView(arcade.View):
         elif key ==  arcade.key.UP or key == arcade.key.W:
             self.upheld = False
 
+#this is on update, every time something changes it changes the screen
     def on_update(self, delta_time):
         """ Movement and game logic """
+
+        #moving the light at the same place as the player
         self.moving_light.position = (
             self.player_sprite.center_x,
             self.player_sprite.center_y
         )
 
+        #this is what happens to player when it respawns
         if self.lives >= 0 and self.player_sprite.center_y < -1000:
             self.died("You fell out of the world")
         elif self.lives <= 0:
@@ -324,7 +340,8 @@ class GameView(arcade.View):
         if self.physics_engine.can_jump() and self.upheld == True:
             self.player_sprite.change_y = PLAYER_JUMP_SPEED
             arcade.play_sound(self.jump_sound)
-        # See if we hit any coins
+
+        # See if we hit any coins/flag
         coin_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
                                                              self.coin_list)
         flag_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
@@ -341,9 +358,11 @@ class GameView(arcade.View):
 
         for flags in flag_hit_list:
             flags.remove_from_sprite_lists()
+            #if there is another level change to it when hit a flag
             try:
                 self.level = self.level + 1
                 self.setup(self.level)
+            #if no more levels quit the game
             except:
                 print("hahaha I ran out of time to make more levels")
                 exit()
@@ -390,13 +409,14 @@ class GameView(arcade.View):
                                 SCREEN_HEIGHT + self.view_bottom)
 
 
-
+#this is what happens when the player pauses the game
 class PauseView(arcade.View):
     def __init__(self, game_view):
         super().__init__()
         self.game_view = game_view
 
     def on_show(self):
+         #background = orange
          arcade.set_background_color(arcade.color.ORANGE)
 
     def on_draw(self):
