@@ -6,7 +6,6 @@ import arcade
 from arcade.experimental.lights import Light, LightLayer
 import timeit
 import math
-import os
 
 # Constants
 SCREEN_WIDTH = 1000
@@ -23,7 +22,7 @@ GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player, in pixels per frame
 PLAYER_MOVEMENT_SPEED = 10
-GRAVITY = 1
+GRAVITY = 1.
 PLAYER_JUMP_SPEED = 20
 
 # How many pixels to keep as a minimum margin between the character
@@ -36,8 +35,8 @@ TOP_VIEWPORT_MARGIN = 300
 Lives = 3
 level = 1
 
-#Speed of the bullets
-BULLET_SPEED = 5
+# Speed of the bullets
+BULLET_SPEED: int = 5
 SPRITE_SCALING_LASER = 0.8
 
 
@@ -74,6 +73,7 @@ class InstructionView(arcade.View):
         game_view.setup(level)
         self.window.show_view(game_view)
 
+
 # game class
 class GameView(arcade.View):
     """
@@ -98,11 +98,9 @@ class GameView(arcade.View):
         # Separate variable that holds the player sprite
         self.player_sprite = None
 
-        #sets bullet variable
-        self.bullet_list = None
-
         # physics engine
         self.physics_engine = None
+        self.bullet_list = None
 
         # Used to keep track of our scrolling
         self.view_bottom = 0
@@ -169,7 +167,6 @@ class GameView(arcade.View):
         self.flags_list = arcade.SpriteList()
         self.foreground_list = arcade.SpriteList()
         self.bullet_list = arcade.SpriteList()
-
 
         # Set up the player, specifically placing it at these coordinates.
         image_source = ":resources:images/animated_characters/male_adventurer/maleAdventurer_idle.png"
@@ -282,8 +279,9 @@ class GameView(arcade.View):
                              arcade.color.WHITE, 18)
 
     def on_mouse_press(self, x, y, button, modifiers):
-        """ Called whenever the mouse button is clicked. """
-
+        """
+        Called whenever the mouse button is clicked.
+        """
         # Create a bullet
         bullet = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png", SPRITE_SCALING_LASER)
 
@@ -296,8 +294,8 @@ class GameView(arcade.View):
         # Get from the mouse the destination location for the bullet
         # IMPORTANT! If you have a scrolling screen, you will also need
         # to add in self.view_bottom and self.view_left.
-        dest_x = x
-        dest_y = y
+        dest_x = x + self.view_left
+        dest_y = y + self.view_bottom
 
         # Do math to calculate how to get the bullet to the destination.
         # Calculation the angle in radians between the start points
@@ -318,7 +316,6 @@ class GameView(arcade.View):
 
         # Add the bullet to the appropriate lists
         self.bullet_list.append(bullet)
-
     # player press key this happens
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
@@ -358,6 +355,32 @@ class GameView(arcade.View):
     # this is on update, every time something changes it changes the screen
     def on_update(self, delta_time):
         """ Movement and game logic """
+        # Call update on all sprites
+        self.bullet_list.update()
+
+        # Loop through each bullet
+        for bullet in self.bullet_list:
+
+            # Check this bullet to see if it hit a coin
+            hit_list = arcade.check_for_collision_with_list(bullet, self.coin_list)
+
+            hit_list2 = arcade.check_for_collision_with_list(bullet, self.wall_list)
+
+            # If it did, get rid of the bullet
+            if len(hit_list) > 0:
+                bullet.remove_from_sprite_lists()
+
+            if len(hit_list2) > 0:
+                bullet.remove_from_sprite_lists()
+
+            # For every coin we hit, add to the score and remove the coin
+            for coin in hit_list:
+                coin.remove_from_sprite_lists()
+                self.score += 1
+
+            # If the bullet flies off-screen, remove it.
+            if bullet.bottom > 800 or bullet.top < 0 or bullet.right < 0 or bullet.left > 7000:
+                bullet.remove_from_sprite_lists()
 
         # moving the light at the same place as the player
         self.moving_light.position = (
@@ -445,25 +468,6 @@ class GameView(arcade.View):
                                 SCREEN_WIDTH + self.view_left,
                                 self.view_bottom,
                                 SCREEN_HEIGHT + self.view_bottom)
-
-        # Loop through each bullet
-        for bullet in self.bullet_list:
-
-            # Check this bullet to see if it hit a coin
-            hit_list = arcade.check_for_collision_with_list(bullet, self.coin_list)
-
-            # If it did, get rid of the bullet
-            if len(hit_list) > 0:
-                bullet.remove_from_sprite_lists()
-
-            # For every coin we hit, add to the score and remove the coin
-            for coin in hit_list:
-                coin.remove_from_sprite_lists()
-                self.score += 1
-
-            # If the bullet flies off-screen, remove it.
-            if bullet.bottom > SCREEN_WIDTH or bullet.top < 0 or bullet.right < 0 or bullet.left > SCREEN_WIDTH:
-                bullet.remove_from_sprite_lists()
 
 
 # this is what happens when the player pauses the game
