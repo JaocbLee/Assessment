@@ -5,6 +5,8 @@ Super bruv
 import arcade
 from arcade.experimental.lights import Light, LightLayer
 import timeit
+import math
+import os
 
 # Constants
 SCREEN_WIDTH = 1000
@@ -33,6 +35,10 @@ TOP_VIEWPORT_MARGIN = 300
 
 Lives = 3
 level = 1
+
+#Speed of the bullets
+BULLET_SPEED = 5
+SPRITE_SCALING_LASER = 0.8
 
 
 # this is the class for creating a starting view
@@ -91,6 +97,9 @@ class GameView(arcade.View):
 
         # Separate variable that holds the player sprite
         self.player_sprite = None
+
+        #sets bullet variable
+        self.bullet_list = None
 
         # physics engine
         self.physics_engine = None
@@ -159,6 +168,8 @@ class GameView(arcade.View):
         self.background_list = arcade.SpriteList()
         self.flags_list = arcade.SpriteList()
         self.foreground_list = arcade.SpriteList()
+        self.bullet_list = arcade.SpriteList()
+
 
         # Set up the player, specifically placing it at these coordinates.
         image_source = ":resources:images/animated_characters/male_adventurer/maleAdventurer_idle.png"
@@ -242,6 +253,7 @@ class GameView(arcade.View):
             self.player_list.draw()
             self.flags_list.draw()
             self.foreground_list.draw()
+            self.bullet_list.draw()
 
         self.light_layer.draw()
         # End of New code
@@ -268,6 +280,44 @@ class GameView(arcade.View):
             output = f"FPS: {self.fps:.0f}"
             arcade.draw_text(output, 10 + self.view_left, 90 + self.view_bottom,
                              arcade.color.WHITE, 18)
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        """ Called whenever the mouse button is clicked. """
+
+        # Create a bullet
+        bullet = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png", SPRITE_SCALING_LASER)
+
+        # Position the bullet at the player's current location
+        start_x = self.player_sprite.center_x
+        start_y = self.player_sprite.center_y
+        bullet.center_x = start_x
+        bullet.center_y = start_y
+
+        # Get from the mouse the destination location for the bullet
+        # IMPORTANT! If you have a scrolling screen, you will also need
+        # to add in self.view_bottom and self.view_left.
+        dest_x = x
+        dest_y = y
+
+        # Do math to calculate how to get the bullet to the destination.
+        # Calculation the angle in radians between the start points
+        # and end points. This is the angle the bullet will travel.
+        x_diff = dest_x - start_x
+        y_diff = dest_y - start_y
+        angle = math.atan2(y_diff, x_diff)
+
+        # Angle the bullet sprite so it doesn't look like it is flying
+        # sideways.
+        bullet.angle = math.degrees(angle)
+        print(f"Bullet angle: {bullet.angle:.2f}")
+
+        # Taking into account the angle, calculate our change_x
+        # and change_y. Velocity is how fast the bullet travels.
+        bullet.change_x = math.cos(angle) * BULLET_SPEED
+        bullet.change_y = math.sin(angle) * BULLET_SPEED
+
+        # Add the bullet to the appropriate lists
+        self.bullet_list.append(bullet)
 
     # player press key this happens
     def on_key_press(self, key, modifiers):
@@ -395,6 +445,25 @@ class GameView(arcade.View):
                                 SCREEN_WIDTH + self.view_left,
                                 self.view_bottom,
                                 SCREEN_HEIGHT + self.view_bottom)
+
+        # Loop through each bullet
+        for bullet in self.bullet_list:
+
+            # Check this bullet to see if it hit a coin
+            hit_list = arcade.check_for_collision_with_list(bullet, self.coin_list)
+
+            # If it did, get rid of the bullet
+            if len(hit_list) > 0:
+                bullet.remove_from_sprite_lists()
+
+            # For every coin we hit, add to the score and remove the coin
+            for coin in hit_list:
+                coin.remove_from_sprite_lists()
+                self.score += 1
+
+            # If the bullet flies off-screen, remove it.
+            if bullet.bottom > SCREEN_WIDTH or bullet.top < 0 or bullet.right < 0 or bullet.left > SCREEN_WIDTH:
+                bullet.remove_from_sprite_lists()
 
 
 # this is what happens when the player pauses the game
