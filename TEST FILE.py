@@ -22,7 +22,7 @@ GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player, in pixels per frame
 PLAYER_MOVEMENT_SPEED = 10
-GRAVITY = 1.
+GRAVITY = 1
 PLAYER_JUMP_SPEED = 20
 
 # How many pixels to keep as a minimum margin between the character
@@ -36,8 +36,8 @@ Lives = 3
 level = 1
 
 # Speed of the bullets
-BULLET_SPEED: int = 5
-SPRITE_SCALING_LASER = 0.8
+BULLET_SPEED: int = 7
+SPRITE_SCALING_LASER = 1.2
 
 
 # this is the class for creating a starting view
@@ -283,7 +283,7 @@ class GameView(arcade.View):
         Called whenever the mouse button is clicked.
         """
         # Create a bullet
-        bullet = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png", SPRITE_SCALING_LASER)
+        bullet = arcade.Sprite("Sprites/bullet.png", SPRITE_SCALING_LASER)
 
         # Position the bullet at the player's current location
         start_x = self.player_sprite.center_x
