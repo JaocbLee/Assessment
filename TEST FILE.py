@@ -33,7 +33,7 @@ BOTTOM_VIEWPORT_MARGIN = 150
 TOP_VIEWPORT_MARGIN = 300
 
 Lives = 3
-level = 1
+num_level = 1
 
 # Speed of the bullets
 BULLET_SPEED: int = 7
@@ -70,7 +70,7 @@ class InstructionView(arcade.View):
     def on_mouse_press(self, _x, _y, _button, _modifiers):
         """ If the user presses the mouse button, start the game. """
         game_view = GameView()
-        game_view.setup(level)
+        game_view.setup(num_level)
         self.window.show_view(game_view)
 
 
@@ -113,7 +113,7 @@ class GameView(arcade.View):
         # Lives variable
         self.lives = 3
         # level variable
-        self.level = 1
+        self.num_level = 1
 
         # New Code remove if doesnt work
         # setting up torch list
@@ -150,7 +150,7 @@ class GameView(arcade.View):
         self.player_sprite.center_y = 500
 
     # this is the setup loop
-    def setup(self, level):
+    def setup(self, num_level):
         """ Set up the game here. Call this function to restart the game. """
 
         # Used to keep track of our scrolling
@@ -178,7 +178,7 @@ class GameView(arcade.View):
         # --- Load in a map from the tiled editor ---
 
         # Name of map file to load
-        map_name = f"Level_{level}.tmx"
+        map_name = f"Level_{num_level}.tmx"
 
         # Read in the tiled map
         my_map = arcade.tilemap.read_tmx(map_name)
@@ -316,6 +316,7 @@ class GameView(arcade.View):
 
         # Add the bullet to the appropriate lists
         self.bullet_list.append(bullet)
+
     # player press key this happens
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
@@ -338,8 +339,8 @@ class GameView(arcade.View):
             pause = PauseView(self)
             self.window.show_view(pause)
         if key == arcade.key.KEY_6:
-            self.level = self.level + 1
-            self.setup(self.level)
+            self.num_level = self.num_level + 1
+            self.setup(self.num_level)
 
     # player release key this what happens
     def on_key_release(self, key, modifiers):
@@ -393,7 +394,7 @@ class GameView(arcade.View):
             self.died("You fell out of the world")
         elif self.lives <= 0:
             self.lives = 3
-            self.setup(self.level)
+            self.setup(self.num_level)
 
         # Move the player with the physics engine
         self.physics_engine.update()
@@ -421,8 +422,8 @@ class GameView(arcade.View):
             flags.remove_from_sprite_lists()
             # if there is another level change to it when hit a flag
             try:
-                self.level = self.level + 1
-                self.setup(self.level)
+                self.num_level = self.num_level + 1
+                self.setup(self.num_level)
             # if no more levels quit the game
             except:
                 print("hahaha I ran out of time to make more levels")
