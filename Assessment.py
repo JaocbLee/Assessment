@@ -12,7 +12,7 @@ SCREEN_HEIGHT = 650
 SCREEN_TITLE = "Super Bruv"
 
 # Constants used to scale our sprites from their original size
-CHARACTER_SCALING = 0.7
+CHARACTER_SCALING = 0.5
 CHARACTER_SHRINK = 0.5
 TILE_SCALING = 0.5
 COIN_SCALING = 0.5
@@ -161,7 +161,7 @@ class GameView(arcade.View):
         self.foreground_list = arcade.SpriteList()
 
         # Set up the player, specifically placing it at these coordinates.
-        image_source = ":resources:images/animated_characters/male_adventurer/maleAdventurer_idle.png"
+        image_source = "Sprites/Character/Character_final.png"
         self.player_sprite = arcade.Sprite(image_source, CHARACTER_SCALING)
         self.player_sprite.center_x = 128
         self.player_sprite.center_y = 500
