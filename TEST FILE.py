@@ -13,7 +13,7 @@ SCREEN_HEIGHT = 650
 SCREEN_TITLE = "Super Bruv"
 
 # Constants used to scale our sprites from their original size
-CHARACTER_SCALING = 0.5
+CHARACTER_SCALING = 0.4
 TILE_SCALING = 0.5
 COIN_SCALING = 0.5
 SPRITE_PIXEL_SIZE = 128

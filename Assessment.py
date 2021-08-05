@@ -161,7 +161,7 @@ class GameView(arcade.View):
         self.foreground_list = arcade.SpriteList()
 
         # Set up the player, specifically placing it at these coordinates.
-        image_source = "Sprites/Character/Character_final.png"
+        image_source = "Sprites/Character/Character_detail.png"
         self.player_sprite = arcade.Sprite(image_source, CHARACTER_SCALING)
         self.player_sprite.center_x = 128
         self.player_sprite.center_y = 500
