@@ -58,7 +58,7 @@ class InstructionView(arcade.View):
         arcade.draw_lrwh_rectangle_textured(0, 0, 1000, 650, img)
 
         # This is drawing the text
-        arcade.draw_text("Super Bruv", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+        arcade.draw_text("Super Bruv(test file)", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
                          arcade.color.BLACK, font_size=50, anchor_x="center")
         arcade.draw_text("Click to advance", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 75,
                          arcade.color.BLACK, font_size=20, anchor_x="center")
