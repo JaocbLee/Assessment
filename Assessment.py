@@ -93,13 +93,16 @@ class GameView(arcade.View):
         self.wall_list = None
         self.player_list = None
         self.background_list = None
+        self.lever_list = None
+        self.invisible_list = None
+        self.test_list = None
 
         # Separate variable that holds the player sprite
         self.player_sprite = None
 
         # physics engine
         self.physics_engine = None
-        self.bullet_list = None
+        self.bullet_sprite = None
 
         # Used to keep track of our scrolling
         self.view_bottom = 0
@@ -113,6 +116,8 @@ class GameView(arcade.View):
         self.lives = 3
         # level variable
         self.num_level = 1
+        #lever variable
+        self.lever = 0
 
         # New Code remove if doesnt work
         # setting up torch list
@@ -165,7 +170,10 @@ class GameView(arcade.View):
         self.background_list = arcade.SpriteList()
         self.flags_list = arcade.SpriteList()
         self.foreground_list = arcade.SpriteList()
-        self.bullet_list = arcade.SpriteList()
+        self.bullet_sprite = arcade.SpriteList()
+        self.lever_list = arcade.SpriteList()
+        self.invisible_list = arcade.SpriteList()
+        self.test_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Set up the player, specifically placing it at these coordinates.
         image_source = "Sprites/Character/Character_final.png"
@@ -189,6 +197,9 @@ class GameView(arcade.View):
         background_layer_name = 'Background'
         flags_layer_name = 'Flags'
         foreground_layer_name = 'Foreground'
+        invisible_layer_name = 'Invisible'
+        lever_layer_name = 'Lever'
+
 
         # -- Platforms list
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
@@ -201,6 +212,10 @@ class GameView(arcade.View):
         self.flags_list = arcade.tilemap.process_layer(my_map, flags_layer_name, TILE_SCALING)
         self.background_list = arcade.tilemap.process_layer(my_map, background_layer_name, TILE_SCALING)
         self.foreground_list = arcade.tilemap.process_layer(my_map, foreground_layer_name, TILE_SCALING)
+        self.lever_list = arcade.tilemap.process_layer(my_map,lever_layer_name , TILE_SCALING)
+
+        self.invisible_list = arcade.tilemap.process_layer(my_map, invisible_layer_name, TILE_SCALING)
+
 
         # --- Other stuff
         # Set the background color
@@ -212,6 +227,16 @@ class GameView(arcade.View):
                                                              self.wall_list,
                                                              GRAVITY)
 
+        coordinate_list2 = [[2304, 512],
+                            [2304, 640],
+                            [2304, 766],
+                           [1128, 300]]
+
+        for coordinate in coordinate_list2:
+            # Add a crate on the ground
+            test = arcade.Sprite(":resources:images/tiles/stoneCenter.png", TILE_SCALING)
+            test.position = coordinate
+            self.test_list.append(test)
     # draws the level and stuff
     def on_draw(self):
         """ Render the screen. """
@@ -243,13 +268,17 @@ class GameView(arcade.View):
             # Draw the contents with lighting
 
             # Draw our sprites
+            self.test_list.draw()
             self.background_list.draw()
             self.wall_list.draw()
             self.coin_list.draw()
             self.player_list.draw()
             self.flags_list.draw()
             self.foreground_list.draw()
-            self.bullet_list.draw()
+            self.bullet_sprite.draw()
+            self.lever_list.draw()
+            self.invisible_list.draw()
+
 
         self.light_layer.draw()
         # End of New code
@@ -271,11 +300,17 @@ class GameView(arcade.View):
         arcade.draw_text(lives_text, 10 + self.view_left, 70 + self.view_bottom,
                          arcade.csscolor.WHITE, 18)
 
+        lever_text = f"Buttons hit: {self.lever}"
+        arcade.draw_text(lever_text, 10 + self.view_left, 110 + self.view_bottom,
+                         arcade.csscolor.WHITE, 18)
+
         # draw fps
         if self.fps is not None:
             output = f"FPS: {self.fps:.0f}"
             arcade.draw_text(output, 10 + self.view_left, 90 + self.view_bottom,
                              arcade.color.WHITE, 18)
+
+
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
@@ -314,7 +349,7 @@ class GameView(arcade.View):
         bullet.change_y = math.sin(angle) * BULLET_SPEED
 
         # Add the bullet to the appropriate lists
-        self.bullet_list.append(bullet)
+        self.bullet_sprite.append(bullet)
 
     # player press key this happens
     def on_key_press(self, key, modifiers):
@@ -356,16 +391,17 @@ class GameView(arcade.View):
     def on_update(self, delta_time):
         """ Movement and game logic """
         # Call update on all sprites
-        self.bullet_list.update()
+        self.bullet_sprite.update()
 
         # Loop through each bullet
-        for bullet in self.bullet_list:
+        for bullet in self.bullet_sprite:
 
             # Check this bullet to see if it hit a coin
             hit_list = arcade.check_for_collision_with_list(bullet, self.coin_list)
 
             hit_list2 = arcade.check_for_collision_with_list(bullet, self.wall_list)
 
+            hit_list3 = arcade.check_for_collision_with_list(bullet, self.lever_list)
             # If it did, get rid of the bullet
             if len(hit_list) > 0:
                 bullet.remove_from_sprite_lists()
@@ -373,14 +409,24 @@ class GameView(arcade.View):
             if len(hit_list2) > 0:
                 bullet.remove_from_sprite_lists()
 
+            if len(hit_list3) > 0:
+                bullet.remove_from_sprite_lists()
+
             # For every coin we hit, add to the score and remove the coin
             for coin in hit_list:
                 coin.remove_from_sprite_lists()
                 self.score += 1
 
+            for lever in hit_list3:
+                lever.remove_from_sprite_lists()
+                self.lever += 1
+                if self.lever == 1:
+                    invis = coordinate_list2
+                    invis.remove_from_sprite_list()
             # If the bullet flies off-screen, remove it.
             if bullet.bottom > 800 or bullet.top < 0 or bullet.right < 0 or bullet.left > 7000:
                 bullet.remove_from_sprite_lists()
+
 
         # moving the light at the same place as the player
         self.moving_light.position = (
@@ -407,6 +453,8 @@ class GameView(arcade.View):
                                                              self.coin_list)
         flag_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
                                                              self.flags_list)
+        #lever_hit_list = arcade.check_for_collision_with_list(self.bullet_sprite,
+        #                                                     self.lever_list)
 
         # Loop through each coin we hit (if any) and remove it
         for coin in coin_hit_list:
@@ -430,6 +478,10 @@ class GameView(arcade.View):
         # --- Manage Scrolling ---
 
         # Track if we need to change the viewport
+
+        #for lever in lever_hit_list:
+        #    lever.remove_from_sprite_lists()
+
 
         changed = False
 

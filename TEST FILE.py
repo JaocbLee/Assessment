@@ -99,7 +99,7 @@ class GameView(arcade.View):
 
         # physics engine
         self.physics_engine = None
-        self.bullet_list = None
+        self.bullet_sprite = None
 
         # Used to keep track of our scrolling
         self.view_bottom = 0
@@ -165,7 +165,7 @@ class GameView(arcade.View):
         self.background_list = arcade.SpriteList()
         self.flags_list = arcade.SpriteList()
         self.foreground_list = arcade.SpriteList()
-        self.bullet_list = arcade.SpriteList()
+        self.bullet_sprite = arcade.SpriteList()
 
         # Set up the player, specifically placing it at these coordinates.
         image_source = "Sprites/Character/Character_final.png"
@@ -249,7 +249,7 @@ class GameView(arcade.View):
             self.player_list.draw()
             self.flags_list.draw()
             self.foreground_list.draw()
-            self.bullet_list.draw()
+            self.bullet_sprite.draw()
 
         self.light_layer.draw()
         # End of New code
@@ -314,7 +314,7 @@ class GameView(arcade.View):
         bullet.change_y = math.sin(angle) * BULLET_SPEED
 
         # Add the bullet to the appropriate lists
-        self.bullet_list.append(bullet)
+        self.bullet_sprite.append(bullet)
 
     # player press key this happens
     def on_key_press(self, key, modifiers):
@@ -356,10 +356,10 @@ class GameView(arcade.View):
     def on_update(self, delta_time):
         """ Movement and game logic """
         # Call update on all sprites
-        self.bullet_list.update()
+        self.bullet_sprite.update()
 
         # Loop through each bullet
-        for bullet in self.bullet_list:
+        for bullet in self.bullet_sprite:
 
             # Check this bullet to see if it hit a coin
             hit_list = arcade.check_for_collision_with_list(bullet, self.coin_list)
