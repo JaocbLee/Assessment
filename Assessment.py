@@ -38,6 +38,10 @@ num_level = 1
 BULLET_SPEED: int = 7
 SPRITE_SCALING_LASER = 1.2
 
+# way the character is facing
+RIGHT_FACING = 0
+LEFT_FACING = 1
+
 
 # this is the class for creating a starting view
 class InstructionView(arcade.View):
