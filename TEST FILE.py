@@ -1,3 +1,5 @@
+"before reomving sprite from list add it to a new one"
+
 """
 Super bruv
 """
@@ -77,7 +79,6 @@ class PlayerCharacter(arcade.Sprite):
 
         # --- Load Textures ---
         main_path = ":resources:images/animated_characters/male_person/malePerson"
-
 
         # Load textures for idle standing
         self.idle_texture_pair = load_texture_pair("Sprites/Character/Character_detail.png")
@@ -199,8 +200,6 @@ class GameView(arcade.View):
 
         # These are 'lists' that keep track of our sprites. Each sprite should
         # go into a list.
-        self.coordinate_list2 = None
-
         self.flags_list = None
         self.foreground_list = None
         self.coin_list = None
@@ -211,6 +210,7 @@ class GameView(arcade.View):
         self.invisible_list = None
         self.ladder_list = None
         self.test_list = None
+
 
         # Separate variable that holds the player sprite
         self.player_sprite = None
@@ -320,13 +320,20 @@ class GameView(arcade.View):
 
         self.end_of_map = my_map.map_size.width * GRID_PIXEL_SIZE
         # -- Platforms list
+
+
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
                                                       layer_name=platforms_layer_name,
                                                       scaling=TILE_SCALING,
                                                       use_spatial_hash=True)
+
         # -- Moving Platforms
         moving_platforms_list = arcade.tilemap.process_layer(my_map, moving_platforms_layer_name, TILE_SCALING)
         for sprite in moving_platforms_list:
+            self.wall_list.append(sprite)
+
+        lever_list = arcade.tilemap.process_layer(my_map, lever_layer_name, TILE_SCALING)
+        for sprite in lever_list:
             self.wall_list.append(sprite)
 
         # -- other lists
@@ -334,11 +341,11 @@ class GameView(arcade.View):
         self.flags_list = arcade.tilemap.process_layer(my_map, flags_layer_name, TILE_SCALING)
         self.background_list = arcade.tilemap.process_layer(my_map, background_layer_name, TILE_SCALING)
         self.foreground_list = arcade.tilemap.process_layer(my_map, foreground_layer_name, TILE_SCALING)
-        self.lever_list = arcade.tilemap.process_layer(my_map, lever_layer_name, TILE_SCALING)
         self.invisible_list = arcade.tilemap.process_layer(my_map, invisible_layer_name, TILE_SCALING)
         self.ladder_list = arcade.tilemap.process_layer(my_map, "Ladders",
                                                         TILE_SCALING,
                                                         use_spatial_hash=True)
+
 
         # --- Other stuff
         # Set the background color
@@ -351,16 +358,8 @@ class GameView(arcade.View):
                                                              self.wall_list,
                                                              gravity_constant=GRAVITY,
                                                              ladders=self.ladder_list)
-        self.coordinate_list2 = [[2304, 512],
-                                 [2304, 640],
-                                 [2304, 766],
-                                 [1128, 300]]
 
-        '''for coordinate in self.coordinate_list2:
-            # Add a crate on the ground
-            wall = arcade.Sprite(":resources:images/tiles/stoneCenter.png", TILE_SCALING)
-            wall.position = coordinate
-            self.wall_list.append(wall)'''
+    arcade.PhysicsEnginePlatformer()
 
     # draws the level and stuff
     def on_draw(self):
@@ -573,6 +572,7 @@ class GameView(arcade.View):
 
             if len(hit_list3) > 0:
                 bullet.remove_from_sprite_lists()
+                print("hit")
 
             # For every coin we hit, add to the score and remove the coin
             for coin in hit_list:
@@ -582,9 +582,7 @@ class GameView(arcade.View):
             for lever in hit_list3:
                 lever.remove_from_sprite_lists()
                 self.lever += 1
-                '''if self.lever == 1:
-                    remove_sprite(self.coordinate_list2)
-                    self.coordinate_list2.clear()'''
+
 
             # If the bullet flies off-screen, remove it.
             if bullet.bottom > 800 or bullet.top < 0 or bullet.right < 0 or bullet.left > 7000:
@@ -642,8 +640,7 @@ class GameView(arcade.View):
                                                              self.coin_list)
         flag_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
                                                              self.flags_list)
-        # lever_hit_list = arcade.check_for_collision_with_list(self.bullet_sprite,
-        #                                                     self.lever_list)
+        #lever_hit_list = arcade.check_for_collision_with_list(self.bullet_sprite, self.lever_list)
 
         # Loop through each coin we hit (if any) and remove it
         for coin in coin_hit_list:
@@ -668,8 +665,8 @@ class GameView(arcade.View):
 
         # Track if we need to change the viewport
 
-        # for lever in lever_hit_list:
-        #    lever.remove_from_sprite_lists()
+        '''for sprite in lever_hit_list:
+            sprite.remove_from_sprite_lists()'''
 
         changed = False
 
