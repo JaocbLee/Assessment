@@ -40,7 +40,7 @@ PLAYER_START_X = 140
 PLAYER_START_Y = 360
 
 # Speed of the bullets
-BULLET_SPEED: int = 7
+BULLET_SPEED: int = 8
 SPRITE_SCALING_LASER = 1.2
 
 # way the character is facing
@@ -332,9 +332,7 @@ class GameView(arcade.View):
         for sprite in moving_platforms_list:
             self.wall_list.append(sprite)
 
-        lever_list = arcade.tilemap.process_layer(my_map, lever_layer_name, TILE_SCALING)
-        for sprite in lever_list:
-            self.wall_list.append(sprite)
+        self.lever_list = arcade.tilemap.process_layer(my_map, lever_layer_name, TILE_SCALING)
 
         # -- other lists
         self.coin_list = arcade.tilemap.process_layer(my_map, coins_layer_name, TILE_SCALING)
@@ -352,14 +350,15 @@ class GameView(arcade.View):
         if my_map.background_color:
             arcade.set_background_color(my_map.background_color)
 
+        for thing in self.lever_list:
+            self.wall_list.append(thing)
         # Create the 'physics engine'
-        # Create the 'physics engine'
+
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite,
                                                              self.wall_list,
                                                              gravity_constant=GRAVITY,
                                                              ladders=self.ladder_list)
 
-    arcade.PhysicsEnginePlatformer()
 
     # draws the level and stuff
     def on_draw(self):
@@ -494,7 +493,7 @@ class GameView(arcade.View):
         # Angle the bullet sprite so it doesn't look like it is flying
         # sideways.
         bullet.angle = math.degrees(angle)
-        print(f"Bullet angle: {bullet.angle:.2f}")
+
 
         # Taking into account the angle, calculate our change_x
         # and change_y. Velocity is how fast the bullet travels.
@@ -582,6 +581,7 @@ class GameView(arcade.View):
             for lever in hit_list3:
                 lever.remove_from_sprite_lists()
                 self.lever += 1
+
 
 
             # If the bullet flies off-screen, remove it.
