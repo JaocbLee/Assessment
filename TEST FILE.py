@@ -205,7 +205,6 @@ class GameView(arcade.View):
         self.player_list = None
         self.background_list = None
         self.lever_list = None
-        self.invisible_list = None
         self.ladder_list = None
         self.test_list = None
 
@@ -286,7 +285,6 @@ class GameView(arcade.View):
         self.foreground_list = arcade.SpriteList()
         self.bullet_sprite = arcade.SpriteList()
         self.lever_list = arcade.SpriteList()
-        self.invisible_list = arcade.SpriteList()
         self.test_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Set up the player, specifically placing it at these coordinates.
@@ -312,7 +310,6 @@ class GameView(arcade.View):
         background_layer_name = 'Background'
         flags_layer_name = 'Flags'
         foreground_layer_name = 'Foreground'
-        invisible_layer_name = 'Invisible'
         lever_layer_name = 'Lever'
 
         self.end_of_map = my_map.map_size.width * GRID_PIXEL_SIZE
@@ -335,7 +332,6 @@ class GameView(arcade.View):
         self.flags_list = arcade.tilemap.process_layer(my_map, flags_layer_name, TILE_SCALING)
         self.background_list = arcade.tilemap.process_layer(my_map, background_layer_name, TILE_SCALING)
         self.foreground_list = arcade.tilemap.process_layer(my_map, foreground_layer_name, TILE_SCALING)
-        self.invisible_list = arcade.tilemap.process_layer(my_map, invisible_layer_name, TILE_SCALING)
         self.ladder_list = arcade.tilemap.process_layer(my_map, "Ladders",
                                                         TILE_SCALING,
                                                         use_spatial_hash=True)
@@ -395,7 +391,6 @@ class GameView(arcade.View):
             self.foreground_list.draw()
             self.bullet_sprite.draw()
             self.lever_list.draw()
-            self.invisible_list.draw()
 
         self.light_layer.draw()
         # End of New code
