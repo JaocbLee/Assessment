@@ -1,4 +1,4 @@
-"before reomving sprite from list add it to a new one"
+"""before reomving sprite from list add it to a new one"""
 
 """
 Super bruv
@@ -22,7 +22,7 @@ SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player, in pixels per frame
-PLAYER_MOVEMENT_SPEED = 7
+PLAYER_MOVEMENT_SPEED = 9
 GRAVITY = 1.5
 PLAYER_JUMP_SPEED = 20
 
@@ -40,7 +40,7 @@ PLAYER_START_X = 140
 PLAYER_START_Y = 360
 
 # Speed of the bullets
-BULLET_SPEED: int = 8
+BULLET_SPEED: int = 14
 SPRITE_SCALING_LASER = 1.2
 
 # way the character is facing
@@ -62,7 +62,6 @@ class PlayerCharacter(arcade.Sprite):
     """ Player Sprite"""
 
     def __init__(self):
-
         # Set up parent class
         super().__init__()
 
@@ -104,9 +103,8 @@ class PlayerCharacter(arcade.Sprite):
         # self.set_hit_box([[-22, -64], [22, -64], [22, 28], [-22, 28]])
         self.set_hit_box(self.texture.hit_box_points)
 
-    '''def update_animation(self, delta_time: float = 1 / 60):
-
-        # Figure out if we need to flip face left or right
+    def update_animation(self, delta_time: float = 1 / 60):
+        """'# Figure out if we need to flip face left or right
         if self.change_x < 0 and self.character_face_direction == RIGHT_FACING:
             self.character_face_direction = LEFT_FACING
         elif self.change_x > 0 and self.character_face_direction == LEFT_FACING:
@@ -142,7 +140,7 @@ class PlayerCharacter(arcade.Sprite):
         self.cur_texture += 1
         if self.cur_texture > 7:
             self.cur_texture = 0
-        self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]'''
+        self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]"""
 
 
 # this is the class for creating a starting view
@@ -210,7 +208,6 @@ class GameView(arcade.View):
         self.invisible_list = None
         self.ladder_list = None
         self.test_list = None
-
 
         # Separate variable that holds the player sprite
         self.player_sprite = None
@@ -321,7 +318,6 @@ class GameView(arcade.View):
         self.end_of_map = my_map.map_size.width * GRID_PIXEL_SIZE
         # -- Platforms list
 
-
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
                                                       layer_name=platforms_layer_name,
                                                       scaling=TILE_SCALING,
@@ -344,7 +340,6 @@ class GameView(arcade.View):
                                                         TILE_SCALING,
                                                         use_spatial_hash=True)
 
-
         # --- Other stuff
         # Set the background color
         if my_map.background_color:
@@ -358,7 +353,6 @@ class GameView(arcade.View):
                                                              self.wall_list,
                                                              gravity_constant=GRAVITY,
                                                              ladders=self.ladder_list)
-
 
     # draws the level and stuff
     def on_draw(self):
@@ -494,7 +488,6 @@ class GameView(arcade.View):
         # sideways.
         bullet.angle = math.degrees(angle)
 
-
         # Taking into account the angle, calculate our change_x
         # and change_y. Velocity is how fast the bullet travels.
         bullet.change_x = math.cos(angle) * BULLET_SPEED
@@ -582,10 +575,8 @@ class GameView(arcade.View):
                 lever.remove_from_sprite_lists()
                 self.lever += 1
 
-
-
             # If the bullet flies off-screen, remove it.
-            if bullet.bottom > 800 or bullet.top < 0 or bullet.right < 0 or bullet.left > 7000:
+            if bullet.bottom > 3000 or bullet.top < 0 or bullet.right < 0 or bullet.left > 7000:
                 bullet.remove_from_sprite_lists()
 
         # moving the light at the same place as the player
@@ -640,7 +631,7 @@ class GameView(arcade.View):
                                                              self.coin_list)
         flag_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
                                                              self.flags_list)
-        #lever_hit_list = arcade.check_for_collision_with_list(self.bullet_sprite, self.lever_list)
+        # lever_hit_list = arcade.check_for_collision_with_list(self.bullet_sprite, self.lever_list)
 
         # Loop through each coin we hit (if any) and remove it
         for coin in coin_hit_list:
