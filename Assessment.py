@@ -8,7 +8,7 @@ import arcade
 from arcade.experimental.lights import Light, LightLayer
 import timeit
 import math
-
+num_of_levels = 4
 # Constants
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
@@ -231,6 +231,8 @@ class GameView(arcade.View):
         self.num_level = 1
         # lever variable
         self.lever = 0
+
+        self.num_of_levels = 4
 
         # New Code remove if doesnt work
         # setting up torch list
@@ -559,7 +561,6 @@ class GameView(arcade.View):
 
             if len(hit_list3) > 0:
                 bullet.remove_from_sprite_lists()
-                print("hit")
 
             # For every coin we hit, add to the score and remove the coin
             for coin in hit_list:
@@ -640,11 +641,10 @@ class GameView(arcade.View):
         for flags in flag_hit_list:
             flags.remove_from_sprite_lists()
             # if there is another level change to it when hit a flag
-            try:
+            if self.num_level < self.num_of_levels:
                 self.num_level = self.num_level + 1
                 self.setup(self.num_level)
-            # if no more levels quit the game
-            except:
+            elif self.num_level >= self.num_of_levels:
                 print("ha ha ha, I ran out of time to make more levels")
                 exit()
         # --- Manage Scrolling ---
