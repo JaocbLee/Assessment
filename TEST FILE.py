@@ -9,6 +9,7 @@ from arcade.experimental.lights import Light, LightLayer
 import timeit
 import math
 
+num_of_levels = 4
 # Constants
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
@@ -46,6 +47,7 @@ SPRITE_SCALING_LASER = 1.2
 # way the character is facing
 RIGHT_FACING = 0
 LEFT_FACING = 1
+flags_req = num_level
 
 
 def load_texture_pair(filename):
@@ -101,16 +103,18 @@ class PlayerCharacter(arcade.Sprite):
         # Hit box will be set based on the first image used. If you want to specify
         # a different hit box, you can do it like the code below.
         # self.set_hit_box([[-22, -64], [22, -64], [22, 28], [-22, 28]])
-        self.set_hit_box(self.texture.hit_box_points)
+
+        ''' IDK IF this line is important but it seems to work without it, so'''
+        # self.set_hit_box(self.texture.hit_box_points)
 
     def update_animation(self, delta_time: float = 1 / 60):
-        """'# Figure out if we need to flip face left or right
+        # Figure out if we need to flip face left or right
         if self.change_x < 0 and self.character_face_direction == RIGHT_FACING:
             self.character_face_direction = LEFT_FACING
         elif self.change_x > 0 and self.character_face_direction == LEFT_FACING:
             self.character_face_direction = RIGHT_FACING
 
-        # Climbing animation
+        ''''# Climbing animation
         if self.is_on_ladder:
             self.climbing = True
         if not self.is_on_ladder and self.climbing:
@@ -129,18 +133,18 @@ class PlayerCharacter(arcade.Sprite):
             return
         elif self.change_y < 0 and not self.is_on_ladder:
             self.texture = self.fall_texture_pair[self.character_face_direction]
-            return
+            return'''
 
         # Idle animation
         if self.change_x == 0:
             self.texture = self.idle_texture_pair[self.character_face_direction]
             return
 
-        # Walking animation
+        ''''# Walking animation
         self.cur_texture += 1
         if self.cur_texture > 7:
-            self.cur_texture = 0
-        self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]"""
+            self.cur_texture = 0'''
+        # self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]
 
 
 # this is the class for creating a starting view
@@ -231,6 +235,9 @@ class GameView(arcade.View):
         self.num_level = 1
         # lever variable
         self.lever = 0
+        self.flags_req = self.num_level
+
+        self.num_of_levels = 4
 
         # New Code remove if doesnt work
         # setting up torch list
@@ -559,7 +566,6 @@ class GameView(arcade.View):
 
             if len(hit_list3) > 0:
                 bullet.remove_from_sprite_lists()
-                print("hit")
 
             # For every coin we hit, add to the score and remove the coin
             for coin in hit_list:
@@ -639,12 +645,15 @@ class GameView(arcade.View):
 
         for flags in flag_hit_list:
             flags.remove_from_sprite_lists()
+            self.flags_req = self.flags_req - 1
             # if there is another level change to it when hit a flag
-            try:
+
+        if self.flags_req == 0:
+            if self.num_level < self.num_of_levels:
                 self.num_level = self.num_level + 1
+                self.flags_req = self.num_level
                 self.setup(self.num_level)
-            # if no more levels quit the game
-            except:
+            elif self.num_level >= self.num_of_levels:
                 print("ha ha ha, I ran out of time to make more levels")
                 exit()
         # --- Manage Scrolling ---
