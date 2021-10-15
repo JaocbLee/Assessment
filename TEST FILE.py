@@ -24,8 +24,8 @@ GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player, in pixels per frame
 PLAYER_MOVEMENT_SPEED = 9
-GRAVITY = 1.5
-PLAYER_JUMP_SPEED = 20
+GRAVITY = 1.3
+PLAYER_JUMP_SPEED = 22
 
 # How many pixels to keep as a minimum margin between the character
 # and the edge of the screen.
@@ -39,6 +39,9 @@ num_level = 1
 
 PLAYER_START_X = 140
 PLAYER_START_Y = 360
+
+PLAYER_START_X2 = 140
+PLAYER_START_Y2 = 5600
 
 # Speed of the bullets
 BULLET_SPEED: int = 14
@@ -273,6 +276,10 @@ class GameView(arcade.View):
         self.player_sprite.center_x = 128
         self.player_sprite.center_y = 500
 
+    def lol(self, message):
+        print(message)
+        exit()
+
     # this is the setup loop
     def setup(self, num_level):
         """ Set up the game here. Call this function to restart the game. """
@@ -297,10 +304,15 @@ class GameView(arcade.View):
         # Set up the player, specifically placing it at these coordinates.
         # Set up the player, specifically placing it at these coordinates.
         self.player_sprite = PlayerCharacter()
+        if num_level < 4:
+            self.player_sprite.center_x = PLAYER_START_X
+            self.player_sprite.center_y = PLAYER_START_Y
+            self.player_list.append(self.player_sprite)
+        elif num_level == 4:
+            self.player_sprite.center_x = PLAYER_START_X2
+            self.player_sprite.center_y = PLAYER_START_Y2
+            self.player_list.append(self.player_sprite)
 
-        self.player_sprite.center_x = PLAYER_START_X
-        self.player_sprite.center_y = PLAYER_START_Y
-        self.player_list.append(self.player_sprite)
 
         # --- Load in a map from the tiled editor ---
 
@@ -522,8 +534,12 @@ class GameView(arcade.View):
             pause = PauseView(self)
             self.window.show_view(pause)
         elif key == arcade.key.KEY_6:
-            self.num_level = self.num_level + 1
-            self.setup(self.num_level)
+            if self.num_level < self.num_of_levels:
+                self.num_level = self.num_level + 1
+                self.flags_req = self.num_level
+                self.setup(self.num_level)
+            elif self.num_level >= self.num_of_levels:
+                self.lol("ha ha ha, I ran out of time to make more levels")
 
         self.process_keychange()
 
@@ -577,7 +593,7 @@ class GameView(arcade.View):
                 self.lever += 1
 
             # If the bullet flies off-screen, remove it.
-            if bullet.bottom > 3000 or bullet.top < 0 or bullet.right < 0 or bullet.left > 7000:
+            if bullet.bottom > 13900 or bullet.top < 0 or bullet.right < 0 or bullet.left > 7000:
                 bullet.remove_from_sprite_lists()
 
         # moving the light at the same place as the player
