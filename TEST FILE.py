@@ -1,14 +1,13 @@
-"""before reomving sprite from list add it to a new one"""
-
-"""
-Super bruv
-"""
-
 import arcade
 from arcade.experimental.lights import Light, LightLayer
 import timeit
 import math
 
+""""before reomving sprite from list add it to a new one"""
+
+"""
+Super bruv
+"""
 num_of_levels = 4
 # Constants
 SCREEN_WIDTH = 1000
@@ -45,7 +44,7 @@ PLAYER_START_Y2 = 5600
 
 # Speed of the bullets
 BULLET_SPEED: int = 14
-SPRITE_SCALING_LASER = 1.2
+SPRITE_SCALING_LASER = 1.5
 
 # way the character is facing
 RIGHT_FACING = 0
@@ -250,7 +249,7 @@ class GameView(arcade.View):
 
         # Add lights to the location of the torches. We're just using hacky tweak value list here
 
-        self.moving_light = Light(400, 300, radius=250, mode='soft')
+        self.moving_light = Light(400, 300, radius=300, mode='soft')
         self.light_layer.add(self.moving_light)
 
         # End of new code
