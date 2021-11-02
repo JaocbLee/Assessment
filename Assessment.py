@@ -1,4 +1,4 @@
-"""before reomving sprite from list add it to a new one"""
+"""before removing sprite from list add it to a new one"""
 
 """
 Super bruv

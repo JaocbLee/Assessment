@@ -3,7 +3,7 @@ from arcade.experimental.lights import Light, LightLayer
 import timeit
 import math
 
-""""before reomving sprite from list add it to a new one"""
+""""before removing sprite from list add it to a new one"""
 
 """
 Super bruv
