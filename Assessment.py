@@ -1,13 +1,13 @@
-"""before removing sprite from list add it to a new one"""
-
-"""
-Super bruv
-"""
-
 import arcade
 from arcade.experimental.lights import Light, LightLayer
 import timeit
 import math
+
+""""before removing sprite from list add it to a new one"""
+
+"""
+Super bruv
+"""
 num_of_levels = 4
 # Constants
 SCREEN_WIDTH = 1000
@@ -23,8 +23,8 @@ GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
 # Movement speed of player, in pixels per frame
 PLAYER_MOVEMENT_SPEED = 9
-GRAVITY = 1.5
-PLAYER_JUMP_SPEED = 20
+GRAVITY = 1.3
+PLAYER_JUMP_SPEED = 22
 
 # How many pixels to keep as a minimum margin between the character
 # and the edge of the screen.
@@ -39,13 +39,17 @@ num_level = 1
 PLAYER_START_X = 140
 PLAYER_START_Y = 360
 
+PLAYER_START_X2 = 140
+PLAYER_START_Y2 = 5600
+
 # Speed of the bullets
 BULLET_SPEED: int = 14
-SPRITE_SCALING_LASER = 1.2
+SPRITE_SCALING_LASER = 1.5
 
 # way the character is facing
 RIGHT_FACING = 0
 LEFT_FACING = 1
+flags_req = num_level
 
 
 def load_texture_pair(filename):
@@ -101,16 +105,18 @@ class PlayerCharacter(arcade.Sprite):
         # Hit box will be set based on the first image used. If you want to specify
         # a different hit box, you can do it like the code below.
         # self.set_hit_box([[-22, -64], [22, -64], [22, 28], [-22, 28]])
-        self.set_hit_box(self.texture.hit_box_points)
+
+        ''' IDK IF this line is important but it seems to work without it, so'''
+        # self.set_hit_box(self.texture.hit_box_points)
 
     def update_animation(self, delta_time: float = 1 / 60):
-        """'# Figure out if we need to flip face left or right
+        # Figure out if we need to flip face left or right
         if self.change_x < 0 and self.character_face_direction == RIGHT_FACING:
             self.character_face_direction = LEFT_FACING
         elif self.change_x > 0 and self.character_face_direction == LEFT_FACING:
             self.character_face_direction = RIGHT_FACING
 
-        # Climbing animation
+        ''''# Climbing animation
         if self.is_on_ladder:
             self.climbing = True
         if not self.is_on_ladder and self.climbing:
@@ -129,18 +135,18 @@ class PlayerCharacter(arcade.Sprite):
             return
         elif self.change_y < 0 and not self.is_on_ladder:
             self.texture = self.fall_texture_pair[self.character_face_direction]
-            return
+            return'''
 
         # Idle animation
         if self.change_x == 0:
             self.texture = self.idle_texture_pair[self.character_face_direction]
             return
 
-        # Walking animation
+        ''''# Walking animation
         self.cur_texture += 1
         if self.cur_texture > 7:
-            self.cur_texture = 0
-        self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]"""
+            self.cur_texture = 0'''
+        # self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]
 
 
 # this is the class for creating a starting view
@@ -231,6 +237,7 @@ class GameView(arcade.View):
         self.num_level = 1
         # lever variable
         self.lever = 0
+        self.flags_req = self.num_level
 
         self.num_of_levels = 4
 
@@ -242,7 +249,7 @@ class GameView(arcade.View):
 
         # Add lights to the location of the torches. We're just using hacky tweak value list here
 
-        self.moving_light = Light(400, 300, radius=250, mode='soft')
+        self.moving_light = Light(400, 300, radius=300, mode='soft')
         self.light_layer.add(self.moving_light)
 
         # End of new code
@@ -268,6 +275,10 @@ class GameView(arcade.View):
         self.player_sprite.center_x = 128
         self.player_sprite.center_y = 500
 
+    def lol(self, message):
+        print(message)
+        exit()
+
     # this is the setup loop
     def setup(self, num_level):
         """ Set up the game here. Call this function to restart the game. """
@@ -292,10 +303,15 @@ class GameView(arcade.View):
         # Set up the player, specifically placing it at these coordinates.
         # Set up the player, specifically placing it at these coordinates.
         self.player_sprite = PlayerCharacter()
+        if num_level < 4:
+            self.player_sprite.center_x = PLAYER_START_X
+            self.player_sprite.center_y = PLAYER_START_Y
+            self.player_list.append(self.player_sprite)
+        elif num_level == 4:
+            self.player_sprite.center_x = PLAYER_START_X2
+            self.player_sprite.center_y = PLAYER_START_Y2
+            self.player_list.append(self.player_sprite)
 
-        self.player_sprite.center_x = PLAYER_START_X
-        self.player_sprite.center_y = PLAYER_START_Y
-        self.player_list.append(self.player_sprite)
 
         # --- Load in a map from the tiled editor ---
 
@@ -517,8 +533,12 @@ class GameView(arcade.View):
             pause = PauseView(self)
             self.window.show_view(pause)
         elif key == arcade.key.KEY_6:
-            self.num_level = self.num_level + 1
-            self.setup(self.num_level)
+            if self.num_level < self.num_of_levels:
+                self.num_level = self.num_level + 1
+                self.flags_req = self.num_level
+                self.setup(self.num_level)
+            elif self.num_level >= self.num_of_levels:
+                self.lol("ha ha ha, I ran out of time to make more levels")
 
         self.process_keychange()
 
@@ -572,7 +592,7 @@ class GameView(arcade.View):
                 self.lever += 1
 
             # If the bullet flies off-screen, remove it.
-            if bullet.bottom > 3000 or bullet.top < 0 or bullet.right < 0 or bullet.left > 7000:
+            if bullet.bottom > 13900 or bullet.top < 0 or bullet.right < 0 or bullet.left > 7000:
                 bullet.remove_from_sprite_lists()
 
         # moving the light at the same place as the player
@@ -640,9 +660,13 @@ class GameView(arcade.View):
 
         for flags in flag_hit_list:
             flags.remove_from_sprite_lists()
+            self.flags_req = self.flags_req - 1
             # if there is another level change to it when hit a flag
+
+        if self.flags_req == 0:
             if self.num_level < self.num_of_levels:
                 self.num_level = self.num_level + 1
+                self.flags_req = self.num_level
                 self.setup(self.num_level)
             elif self.num_level >= self.num_of_levels:
                 print("ha ha ha, I ran out of time to make more levels")
