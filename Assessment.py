@@ -2,12 +2,13 @@ import arcade
 from arcade.experimental.lights import Light, LightLayer
 import timeit
 import math
-
-""""before removing sprite from list add it to a new one"""
+from arcade.gl import geometry
 
 """
 Super bruv
 """
+
+#num of levels
 num_of_levels = 4
 # Constants
 SCREEN_WIDTH = 1000
@@ -21,7 +22,11 @@ COIN_SCALING = TILE_SCALING
 SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
 
-# Movement speed of player, in pixels per frame
+
+PLAYING_FIELD_WIDTH = 5000
+PLAYING_FIELD_HEIGHT = 1000
+
+# Movement speed of player, gravity and jump speed
 PLAYER_MOVEMENT_SPEED = 9
 GRAVITY = 1.3
 PLAYER_JUMP_SPEED = 22
@@ -33,14 +38,19 @@ RIGHT_VIEWPORT_MARGIN = 250
 BOTTOM_VIEWPORT_MARGIN = 150
 TOP_VIEWPORT_MARGIN = 300
 
+# levels and lives
 Lives = 3
 num_level = 1
 
+# player start for different levels
 PLAYER_START_X = 140
 PLAYER_START_Y = 360
 
 PLAYER_START_X2 = 140
 PLAYER_START_Y2 = 5600
+
+PLAYER_START_X3 = 140
+PLAYER_START_Y3 = 2800
 
 # Speed of the bullets
 BULLET_SPEED: int = 14
@@ -61,7 +71,7 @@ def load_texture_pair(filename):
         arcade.load_texture(filename, flipped_horizontally=True)
     ]
 
-
+# Player class
 class PlayerCharacter(arcade.Sprite):
     """ Player Sprite"""
 
@@ -102,11 +112,7 @@ class PlayerCharacter(arcade.Sprite):
         # Set the initial texture
         self.texture = self.idle_texture_pair[0]
 
-        # Hit box will be set based on the first image used. If you want to specify
-        # a different hit box, you can do it like the code below.
-        # self.set_hit_box([[-22, -64], [22, -64], [22, 28], [-22, 28]])
-
-        ''' IDK IF this line is important but it seems to work without it, so'''
+        # IDK IF this line is important but it seems to work without it, soooo
         # self.set_hit_box(self.texture.hit_box_points)
 
     def update_animation(self, delta_time: float = 1 / 60):
@@ -116,6 +122,7 @@ class PlayerCharacter(arcade.Sprite):
         elif self.change_x > 0 and self.character_face_direction == LEFT_FACING:
             self.character_face_direction = RIGHT_FACING
 
+        # irelavent
         ''''# Climbing animation
         if self.is_on_ladder:
             self.climbing = True
@@ -137,7 +144,7 @@ class PlayerCharacter(arcade.Sprite):
             self.texture = self.fall_texture_pair[self.character_face_direction]
             return'''
 
-        # Idle animation
+        # Idle facing directions
         if self.change_x == 0:
             self.texture = self.idle_texture_pair[self.character_face_direction]
             return
@@ -192,18 +199,17 @@ class GameView(arcade.View):
     # really important things
     def __init__(self):
 
-        # Call the parent class and set up the window
+        # Important parent class, dont remove or wont work
         super().__init__()
 
-        # Track the current state of what key is pressed
+        # Tracking what key is pressed
         self.left_pressed = False
         self.right_pressed = False
         self.up_pressed = False
         self.down_pressed = False
         self.jump_needs_reset = False
 
-        # These are 'lists' that keep track of our sprites. Each sprite should
-        # go into a list.
+        # setting sprite lists
         self.flags_list = None
         self.foreground_list = None
         self.coin_list = None
@@ -241,18 +247,14 @@ class GameView(arcade.View):
 
         self.num_of_levels = 4
 
-        # New Code remove if doesnt work
         # setting up torch list
         self.torch_list = arcade.SpriteList(is_static=True)
 
         self.light_layer = LightLayer(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-        # Add lights to the location of the torches. We're just using hacky tweak value list here
-
+        # setting the radius of the light and then setting the hardness level of it.
         self.moving_light = Light(400, 300, radius=300, mode='soft')
         self.light_layer.add(self.moving_light)
-
-        # End of new code
 
         self.upheld = False
 
@@ -264,9 +266,11 @@ class GameView(arcade.View):
         self.collect_coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
         self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
 
+        # Set the background color
+        arcade.set_background_color(arcade.color.BLACK)
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
-    # This is the death loop
+    # This is the death function
     def died(self, message):
         print(message)
         self.player_sprite.change_y = PLAYER_JUMP_SPEED
@@ -275,6 +279,7 @@ class GameView(arcade.View):
         self.player_sprite.center_x = 128
         self.player_sprite.center_y = 500
 
+    # This doesnt work, due to exit showing error
     def lol(self, message):
         print(message)
         exit()
@@ -303,15 +308,19 @@ class GameView(arcade.View):
         # Set up the player, specifically placing it at these coordinates.
         # Set up the player, specifically placing it at these coordinates.
         self.player_sprite = PlayerCharacter()
+        # coordinates change based on what level player is on
         if num_level < 4:
             self.player_sprite.center_x = PLAYER_START_X
             self.player_sprite.center_y = PLAYER_START_Y
             self.player_list.append(self.player_sprite)
-        elif num_level == 4:
+        elif num_level == 3:
             self.player_sprite.center_x = PLAYER_START_X2
             self.player_sprite.center_y = PLAYER_START_Y2
             self.player_list.append(self.player_sprite)
-
+        elif num_level == 4:
+            self.player_sprite.center_x = PLAYER_START_X3
+            self.player_sprite.center_y = PLAYER_START_Y3
+            self.player_list.append(self.player_sprite)
 
         # --- Load in a map from the tiled editor ---
 
@@ -338,7 +347,7 @@ class GameView(arcade.View):
                                                       scaling=TILE_SCALING,
                                                       use_spatial_hash=True)
 
-        # -- Moving Platforms
+        # -- Moving Platforms (doesnt work)
         moving_platforms_list = arcade.tilemap.process_layer(my_map, moving_platforms_layer_name, TILE_SCALING)
         for sprite in moving_platforms_list:
             self.wall_list.append(sprite)
@@ -354,7 +363,7 @@ class GameView(arcade.View):
                                                         TILE_SCALING,
                                                         use_spatial_hash=True)
 
-        # --- Other stuff
+        #  Other stuff
         # Set the background color
         if my_map.background_color:
             arcade.set_background_color(my_map.background_color)
@@ -391,12 +400,10 @@ class GameView(arcade.View):
         # Add one to our frame count
         self.frame_count += 1
 
-        # New Code
         # Everything that should be affected by lights in here
         with self.light_layer:
 
             self.torch_list.draw()
-            # Draw the contents with lighting
 
             # Draw our sprites
             self.test_list.draw()
@@ -430,9 +437,6 @@ class GameView(arcade.View):
         arcade.draw_text(lives_text, 10 + self.view_left, 70 + self.view_bottom,
                          arcade.csscolor.WHITE, 18)
 
-        lever_text = f"Buttons hit: {self.lever}"
-        arcade.draw_text(lever_text, 10 + self.view_left, 110 + self.view_bottom,
-                         arcade.csscolor.WHITE, 18)
 
         # draw fps
         if self.fps is not None:
@@ -502,7 +506,7 @@ class GameView(arcade.View):
         bullet.angle = math.degrees(angle)
 
         # Taking into account the angle, calculate our change_x
-        # and change_y. Velocity is how fast the bullet travels.
+        # and change_y. Bullet_speed is the velocity
         bullet.change_x = math.cos(angle) * BULLET_SPEED
         bullet.change_y = math.sin(angle) * BULLET_SPEED
 
@@ -532,6 +536,10 @@ class GameView(arcade.View):
             # pass self, the current view, to preserve this view's state
             pause = PauseView(self)
             self.window.show_view(pause)
+        elif  key == arcade.key.M:
+            # pass self, the current view, to preserve this view's state
+            MAP = MAPVIEW(self)
+            self.window.show_view(MAP)
         elif key == arcade.key.KEY_6:
             if self.num_level < self.num_of_levels:
                 self.num_level = self.num_level + 1
@@ -542,6 +550,7 @@ class GameView(arcade.View):
 
         self.process_keychange()
 
+    # Key release, info
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
 
@@ -587,6 +596,7 @@ class GameView(arcade.View):
                 coin.remove_from_sprite_lists()
                 self.score += 1
 
+            # removes levers
             for lever in hit_list3:
                 lever.remove_from_sprite_lists()
                 self.lever += 1
@@ -647,7 +657,6 @@ class GameView(arcade.View):
                                                              self.coin_list)
         flag_hit_list = arcade.check_for_collision_with_list(self.player_sprite,
                                                              self.flags_list)
-        # lever_hit_list = arcade.check_for_collision_with_list(self.bullet_sprite, self.lever_list)
 
         # Loop through each coin we hit (if any) and remove it
         for coin in coin_hit_list:
@@ -658,6 +667,7 @@ class GameView(arcade.View):
             # Add one to the score
             self.score += 1
 
+        # if flags hit remove them from the list
         for flags in flag_hit_list:
             flags.remove_from_sprite_lists()
             self.flags_req = self.flags_req - 1
@@ -668,15 +678,14 @@ class GameView(arcade.View):
                 self.num_level = self.num_level + 1
                 self.flags_req = self.num_level
                 self.setup(self.num_level)
+
             elif self.num_level >= self.num_of_levels:
-                print("ha ha ha, I ran out of time to make more levels")
-                exit()
+                end_view = end_screen(self)
+                self.window.show_view(end_view)
+
         # --- Manage Scrolling ---
 
         # Track if we need to change the viewport
-
-        '''for sprite in lever_hit_list:
-            sprite.remove_from_sprite_lists()'''
 
         changed = False
 
@@ -715,6 +724,72 @@ class GameView(arcade.View):
                                 SCREEN_WIDTH + self.view_left,
                                 self.view_bottom,
                                 SCREEN_HEIGHT + self.view_bottom)
+
+
+
+class MAPVIEW(arcade.View):
+    def __init__(self, game_view):
+        super().__init__()
+        self.game_view = game_view
+
+    def on_show(self):
+        # background = orange
+        arcade.set_background_color(arcade.color.ORANGE)
+
+    def on_draw(self):
+        arcade.start_render()
+
+        # Draw player, for effect, on pause screen.
+        # The previous View (GameView) was passed in
+        # and saved in self.game_view.
+        player_sprite = self.game_view.player_sprite
+        # player_sprite.draw()
+
+        # draw an orange filter over him
+        img2 = arcade.load_texture(f"Map_{num_level}.png")
+        arcade.draw_lrwh_rectangle_textured( player_sprite.left - 300, player_sprite.top, 500, 200, img2)
+        arcade.draw_lrtb_rectangle_filled(left=player_sprite.left,
+                                          right=player_sprite.right,
+                                          top=player_sprite.top,
+                                          bottom=player_sprite.bottom,
+                                          color=arcade.color.ORANGE + (200,))
+        # Show tip to return or reset
+        arcade.draw_text("Press Esc. to return",
+                         player_sprite.left,
+                         player_sprite.top,
+                         arcade.color.BLACK,
+                         font_size=20,
+                         anchor_x="center")
+
+    def on_key_press(self, key, _modifiers):
+        if key == arcade.key.ESCAPE:  # resume game
+            self.window.show_view(self.game_view)
+            arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
+
+class end_screen(arcade.View):
+    def __init__(self, game_view):
+        super().__init__()
+        self.game_view = game_view
+
+    def on_show(self):
+        """ This is run once when we switch to this view """
+
+        # Reset the viewport, necessary if we have a scrolling game and we need
+        # to reset the viewport back to the start so we can see what we draw.
+        arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
+
+    def on_draw(self):
+        arcade.start_render()
+
+        img3 = arcade.load_texture("End_screen.png")
+        arcade.draw_lrwh_rectangle_textured(SCREEN_WIDTH, SCREEN_HEIGHT, 500, 200, img3)
+        # This is drawing the text
+        arcade.draw_text("You Win",SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+                         arcade.color.BLACK, font_size=20,)
+        arcade.draw_text("Click to advance", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 75,
+                         arcade.color.BLACK, font_size=20, anchor_x="center")
+        arcade.draw_text("By Jacob.L", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 140,
+                         arcade.color.BLACK, font_size=20, anchor_x="center")
 
 
 # this is what happens when the player pauses the game
@@ -768,6 +843,7 @@ class PauseView(arcade.View):
 
         elif key == arcade.key.ENTER:  # reset game
             self.window.show_view(InstructionView())
+
 
 
 def main():
