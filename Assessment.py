@@ -784,10 +784,8 @@ class end_screen(arcade.View):
         img3 = arcade.load_texture("End_screen.png")
         arcade.draw_lrwh_rectangle_textured(SCREEN_WIDTH, SCREEN_HEIGHT, 500, 200, img3)
         # This is drawing the text
-        arcade.draw_text("You Win",SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+        arcade.draw_text("You Win",SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 -140,
                          arcade.color.BLACK, font_size=20,)
-        arcade.draw_text("Click to advance", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 75,
-                         arcade.color.BLACK, font_size=20, anchor_x="center")
         arcade.draw_text("By Jacob.L", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 140,
                          arcade.color.BLACK, font_size=20, anchor_x="center")
 
