@@ -2,13 +2,12 @@ import arcade
 from arcade.experimental.lights import Light, LightLayer
 import timeit
 import math
-from arcade.gl import geometry
 
 """
 Super bruv
 """
 
-#num of levels
+# num of levels
 num_of_levels = 4
 # Constants
 SCREEN_WIDTH = 1000
@@ -21,7 +20,6 @@ CHARACTER_SCALING = 0.4
 COIN_SCALING = TILE_SCALING
 SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = (SPRITE_PIXEL_SIZE * TILE_SCALING)
-
 
 PLAYING_FIELD_WIDTH = 5000
 PLAYING_FIELD_HEIGHT = 1000
@@ -70,6 +68,7 @@ def load_texture_pair(filename):
         arcade.load_texture(filename),
         arcade.load_texture(filename, flipped_horizontally=True)
     ]
+
 
 # Player class
 class PlayerCharacter(arcade.Sprite):
@@ -437,7 +436,6 @@ class GameView(arcade.View):
         arcade.draw_text(lives_text, 10 + self.view_left, 70 + self.view_bottom,
                          arcade.csscolor.WHITE, 18)
 
-
         # draw fps
         if self.fps is not None:
             output = f"FPS: {self.fps:.0f}"
@@ -536,10 +534,10 @@ class GameView(arcade.View):
             # pass self, the current view, to preserve this view's state
             pause = PauseView(self)
             self.window.show_view(pause)
-        elif  key == arcade.key.M:
+        elif key == arcade.key.M:
             # pass self, the current view, to preserve this view's state
-            MAP = MAPVIEW(self)
-            self.window.show_view(MAP)
+            death = Mapview(self)
+            self.window.show_view(death)
         elif key == arcade.key.KEY_6:
             if self.num_level < self.num_of_levels:
                 self.num_level = self.num_level + 1
@@ -680,7 +678,7 @@ class GameView(arcade.View):
                 self.setup(self.num_level)
 
             elif self.num_level >= self.num_of_levels:
-                end_view = end_screen(self)
+                end_view = Endview(self)
                 self.window.show_view(end_view)
 
         # --- Manage Scrolling ---
@@ -726,8 +724,7 @@ class GameView(arcade.View):
                                 SCREEN_HEIGHT + self.view_bottom)
 
 
-
-class MAPVIEW(arcade.View):
+class Mapview(arcade.View):
     def __init__(self, game_view):
         super().__init__()
         self.game_view = game_view
@@ -747,7 +744,7 @@ class MAPVIEW(arcade.View):
 
         # draw an orange filter over him
         img2 = arcade.load_texture(f"Map_{num_level}.png")
-        arcade.draw_lrwh_rectangle_textured( player_sprite.left - 300, player_sprite.top, 500, 200, img2)
+        arcade.draw_lrwh_rectangle_textured(player_sprite.left - 300, player_sprite.top, 500, 200, img2)
         arcade.draw_lrtb_rectangle_filled(left=player_sprite.left,
                                           right=player_sprite.right,
                                           top=player_sprite.top,
@@ -766,7 +763,8 @@ class MAPVIEW(arcade.View):
             self.window.show_view(self.game_view)
             arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
-class end_screen(arcade.View):
+
+class Endview(arcade.View):
     def __init__(self, game_view):
         super().__init__()
         self.game_view = game_view
@@ -839,7 +837,6 @@ class PauseView(arcade.View):
 
         elif key == arcade.key.ENTER:  # reset game
             self.window.show_view(InstructionView())
-
 
 
 def main():
