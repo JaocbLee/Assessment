@@ -6,7 +6,6 @@ import math
 """
 Super bruv
 """
-
 # num of levels
 num_of_levels = 4
 # Constants
@@ -58,7 +57,6 @@ SPRITE_SCALING_LASER = 1.5
 RIGHT_FACING = 0
 LEFT_FACING = 1
 flags_req = num_level
-
 
 def load_texture_pair(filename):
     """
@@ -279,7 +277,7 @@ class GameView(arcade.View):
         self.player_sprite.center_y = 500
 
     # This doesnt work, due to exit showing error
-    def lol(self, message):
+    def loss(self, message):
         print(message)
         exit()
 
@@ -328,7 +326,6 @@ class GameView(arcade.View):
 
         # Read in the tiled map
         my_map = arcade.tilemap.read_tmx(map_name)
-        moving_platforms_layer_name = 'Moving Platforms'
         # Name of the layer in the file that has our platforms/walls
         platforms_layer_name = 'Platforms'
         # Name of the layer that has items for pick-up
@@ -345,11 +342,6 @@ class GameView(arcade.View):
                                                       layer_name=platforms_layer_name,
                                                       scaling=TILE_SCALING,
                                                       use_spatial_hash=True)
-
-        # -- Moving Platforms (doesnt work)
-        moving_platforms_list = arcade.tilemap.process_layer(my_map, moving_platforms_layer_name, TILE_SCALING)
-        for sprite in moving_platforms_list:
-            self.wall_list.append(sprite)
 
         self.lever_list = arcade.tilemap.process_layer(my_map, lever_layer_name, TILE_SCALING)
 
@@ -544,7 +536,7 @@ class GameView(arcade.View):
                 self.flags_req = self.num_level
                 self.setup(self.num_level)
             elif self.num_level >= self.num_of_levels:
-                self.lol("ha ha ha, I ran out of time to make more levels")
+                self.loss("ha ha ha, I ran out of time to make more levels")
 
         self.process_keychange()
 
@@ -774,15 +766,16 @@ class Endview(arcade.View):
 
         # Reset the viewport, necessary if we have a scrolling game and we need
         # to reset the viewport back to the start so we can see what we draw.
+        arcade.set_viewport(SCREEN_WIDTH, 0, 0, SCREEN_HEIGHT-8)
         arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
 
     def on_draw(self):
         arcade.start_render()
         # This is drawing the text
 
-        arcade.draw_text("You Win", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, arcade.color.BLACK,
+        arcade.draw_text("You Win", SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100, arcade.color.BLACK,
                          font_size=40, anchor_x="center")
-        arcade.draw_text("By Jacob.L", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 140, arcade.color.BLACK,
+        arcade.draw_text("By Jacob.L", SCREEN_WIDTH / 2- 100 , SCREEN_HEIGHT / 2 - 140, arcade.color.BLACK,
                          font_size=40, anchor_x="center")
 
 
