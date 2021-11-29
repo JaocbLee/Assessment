@@ -774,6 +774,7 @@ class Endview(arcade.View):
         arcade.draw_text("By Jacob.L", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 100, arcade.color.BLACK,
                          font_size=30, anchor_x="center")
 
+
 # this is what happens when the player pauses the game
 class PauseView(arcade.View):
     def __init__(self, game_view):
