@@ -58,6 +58,7 @@ RIGHT_FACING = 0
 LEFT_FACING = 1
 flags_req = num_level
 
+
 def load_texture_pair(filename):
     """
     Load a texture pair, with the second being a mirror image.
@@ -259,7 +260,6 @@ class GameView(arcade.View):
         self.frame_count = 0
         self.fps_start_timer = None
         self.fps = None
-
 
         # Set the background color
         arcade.set_background_color(arcade.color.BLACK)
@@ -665,7 +665,7 @@ class GameView(arcade.View):
                 self.setup(self.num_level)
 
             elif self.num_level >= self.num_of_levels:
-                end_view = Endview(self)
+                end_view = Endview()
                 self.window.show_view(end_view)
 
         # --- Manage Scrolling ---
@@ -752,27 +752,27 @@ class Mapview(arcade.View):
 
 
 class Endview(arcade.View):
-    def __init__(self, game_view):
+    def __init__(self):
         super().__init__()
-        self.game_view = game_view
 
     def on_show(self):
         """ This is run once when we switch to this view """
 
         # Reset the viewport, necessary if we have a scrolling game and we need
         # to reset the viewport back to the start so we can see what we draw.
-        arcade.set_viewport(SCREEN_WIDTH, 0, 0, SCREEN_HEIGHT-8)
+
         arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
 
-    def on_draw(self):
         arcade.start_render()
         # This is drawing the text
 
-        arcade.draw_text("You Win", SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100, arcade.color.BLACK,
-                         font_size=40, anchor_x="center")
-        arcade.draw_text("By Jacob.L", SCREEN_WIDTH / 2- 100 , SCREEN_HEIGHT / 2 - 140, arcade.color.BLACK,
-                         font_size=40, anchor_x="center")
+        arcade.draw_text("You Win", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, arcade.color.BLACK,
+                         font_size=30, anchor_x="center")
+        arcade.draw_text("Game Over", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 50, arcade.color.BLACK,
+                         font_size=30, anchor_x="center")
 
+        arcade.draw_text("By Jacob.L", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 100, arcade.color.BLACK,
+                         font_size=30, anchor_x="center")
 
 # this is what happens when the player pauses the game
 class PauseView(arcade.View):

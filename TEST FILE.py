@@ -675,9 +675,6 @@ class GameView(arcade.View):
 
         # Track if we need to change the viewport
 
-        '''for sprite in lever_hit_list:
-            sprite.remove_from_sprite_lists()'''
-
         changed = False
 
         # Scroll left
