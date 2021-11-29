@@ -259,9 +259,7 @@ class GameView(arcade.View):
         self.frame_count = 0
         self.fps_start_timer = None
         self.fps = None
-        # Load sounds
-        self.collect_coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
-        self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
+
 
         # Set the background color
         arcade.set_background_color(arcade.color.BLACK)
@@ -445,7 +443,6 @@ class GameView(arcade.View):
             elif self.physics_engine.can_jump(y_distance=10) and not self.jump_needs_reset:
                 self.player_sprite.change_y = PLAYER_JUMP_SPEED
                 self.jump_needs_reset = True
-                arcade.play_sound(self.jump_sound)
         elif self.down_pressed and not self.up_pressed:
             if self.physics_engine.is_on_ladder():
                 self.player_sprite.change_y = -PLAYER_MOVEMENT_SPEED
@@ -652,8 +649,6 @@ class GameView(arcade.View):
         for coin in coin_hit_list:
             # Remove the coin
             coin.remove_from_sprite_lists()
-            # Play a sound
-            arcade.play_sound(self.collect_coin_sound)
             # Add one to the score
             self.score += 1
 
